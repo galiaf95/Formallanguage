@@ -96,6 +96,11 @@ KEYWORDS	"if"|"then"|"else"|"while"|"do"|"skip"|"write"|"read"
 
 int main( int argc, char **argv )
 {
+	++argv, --argc;
+	if ( argc > 0 )
+		yyin = fopen( argv[0], "r" );
+	else
+		yyin = stdin;
 	yylex();
 	printf("\n");
 }
