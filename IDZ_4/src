@@ -88,8 +88,8 @@ KEYWORDS	"if"|"then"|"else"|"while"|"do"|"skip"|"write"|"read"
 			column_number = 0;
 		}
 
-[ \t]		{
-                        column_number = column_number + 1;
+[ \t]+		{
+                        increase_column_posiiton(yytext);
                 }
 
 %%
