@@ -1,14 +1,17 @@
-OPERATIONS	"+"|"-"|"*"|"/"|"%"|"=="|"!="|">"|">="|"<"|"<="|"&&"|"||"
-VARIABLE	[a-zA-Z]+
+OPERATIONS	"+"|"-"|"*"|"/"|"%"|"=="|"!="|":="|">"|">="|"<"|"<="|"&&"|"||"
+VARIABLE	([a-zA-Z]+[0-9]*)*
 NUMBERS		[0-9]+
 KEYWORDS	"if"|"then"|"else"|"while"|"do"|"skip"|"write"|"read"
+NL              \n|\n\r
+COMMENT         \/\/.*
+ML_COMMENT	\(\*[^*]*[^)]*\*\)
 
 %option noyywrap
 
 %{
 	#include <string.h>
 	#include <ctype.h>
-
+	
 	int row_number = 0;
 	int column_number = 0;
 	int increase_column_posiiton(char* text)
@@ -27,9 +30,32 @@ KEYWORDS	"if"|"then"|"else"|"while"|"do"|"skip"|"write"|"read"
 
 %%
 
+{COMMENT}	{
+			int old_column = column_number;
+			increase_column_posiiton(yytext);
+			printf("Comment(%i, %i, %i); ", row_number, old_column, column_number - 1);
+                }
+
+{ML_COMMENT}	{
+			int old_column = column_number;
+			int old_row = row_number;
+			int i = 0;
+			for(i = 0; i < yyleng; i++)
+			{
+				if (yytext[i] == '\n')
+				{
+					row_number += 1;
+					column_number = 0;
+				}
+				else if (yytext[i] == '\r')
+					continue;
+				else
+					column_number += 1;
+			}
+			printf("Multiline_Comment(%i ,%i, %i, %i); ", old_row, old_column, row_number, column_number - 1);
+		}
 
 [()]		{
-                        column_number = column_number + 1;
 			int old_column = column_number;
                         increase_column_posiiton(yytext);
 			char* br_name;
@@ -62,6 +88,7 @@ KEYWORDS	"if"|"then"|"else"|"while"|"do"|"skip"|"write"|"read"
                         if(strcmp(yytext, "%")==0) op_name = "Mod";
                         if(strcmp(yytext, "==")==0) op_name = "Equality";
                         if(strcmp(yytext, "!=")==0) op_name = "NotEquality";
+			if(strcmp(yytext, ":=")==0) op_name = "Equation";
                         if(strcmp(yytext, ">")==0) op_name = "Greater";
                         if(strcmp(yytext, ">=")==0) op_name = "GreaterEqual";
                         if(strcmp(yytext, "<")==0) op_name = "Lower";
@@ -80,17 +107,24 @@ KEYWORDS	"if"|"then"|"else"|"while"|"do"|"skip"|"write"|"read"
 ;		{
                         int old_column = column_number;
 			increase_column_posiiton(yytext);
-			printf("Colon(0, %i, %i, %i); ", row_number, old_column, column_number - 1);
+			printf("Colon(%i, %i, %i); ", row_number, old_column, column_number - 1);
 		}
 
-\n|\n\r	 	{
+{NL}	 	{
 			row_number = row_number + 1;
 			column_number = 0;
 		}
 
-[ \t]+		{
+[ \t]+          {
                         increase_column_posiiton(yytext);
                 }
+
+.		{			
+			int old_column = column_number;
+			increase_column_posiiton(yytext);
+			printf("ErrorUnknown(\"%s\", %i, %i, %i); ", yytext, row_number, old_column, column_number - 1);
+                }
+
 
 %%
 
