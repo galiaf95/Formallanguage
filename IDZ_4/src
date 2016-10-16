@@ -1,4 +1,4 @@
-OPERATIONS	"+"|"-"|"*"|"/"|"%"|"=="|"!="|":="|">"|">="|"<"|"<="|"&&"|"||"
+OPERATIONS	"+"|"-"|"*"|"**"|"/"|"%"|"=="|"!="|":="|">"|">="|"<"|"<="|"&&"|"||"
 VARIABLE	([a-zA-Z]+[0-9]*)*
 NUMBERS		[0-9]+
 KEYWORDS	"if"|"then"|"else"|"while"|"do"|"skip"|"write"|"read"
@@ -84,6 +84,7 @@ ML_COMMENT	\(\*[^*]*[^)]*\*\)
 			if(strcmp(yytext, "+")==0) op_name = "Plus";
                         if(strcmp(yytext, "-")==0) op_name = "Minus";
                         if(strcmp(yytext, "*")==0) op_name = "Multiplication";
+                        if(strcmp(yytext, "**")==0) op_name = "Power";
                         if(strcmp(yytext, "/")==0) op_name = "Division";
                         if(strcmp(yytext, "%")==0) op_name = "Mod";
                         if(strcmp(yytext, "==")==0) op_name = "Equality";
